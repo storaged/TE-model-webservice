@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+
+<form method="POST">
+  <div class="form-group">
+    <label>Niche size</label>
+    <input type="text" class="form-control" id="niche_size" name="niche_size"
+    aria-describedby="emailHelp" placeholder="e.g. 1000">
+  </div>
+  <div class="form-group">
+    <label>Number of traits</label>
+    <input type="text" class="form-control" id="number_of_traits"
+                                            name="number_of_traits"
+    placeholder="e.g. 2">
+  </div>
+  <div class="form-group">
+    <label>Optimum change speed</label>
+    <input type="text" class="form-control" id="optimum_change_speed"
+                                            name="optimum_change_speed"
+    placeholder="e.g. 0.001">
+  </div>
+
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+<form method="POST">
+PARAM1: <input type="text" name="param1"> <br>
+PARAM2: <input type="text" name="param2"> <br>
+Niche Size:  <input type="text" name="niche_size" value="1000"> <br>
+Number of traits:<input type="text" name="number_of_traits" value="2"> <br>
+Active optimum change: <input type="checkbox"
+onchange="document.getElementById('optimum_speed').disabled =
+                              !this.checked;"name='active_optimum_speed'
+                              id='active_optimum_speed'/> <br>
+Optimum change speed: <input type="text" name="optimum_change_shift"
+                                         id="optimum_speed"> <br>
+                                         Generations per shift: <input type="text" name="generations_per_shift"> <br>
+
+<input type="submit">
+</form>
+<ul>
+{% for el in zmienna %}
+<li>{{el.param1}}, {{el.param2}}, <a href="results/{{el.result}}">See results</a></li>
+{% endfor %}
+</ul>
+
+</div>
+{% endblock %}
