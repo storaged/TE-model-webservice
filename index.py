@@ -29,8 +29,8 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     niche_size = db.Column(db.Integer)
     number_of_traits = db.Column(db.Integer)
-    optimum_change_speed = db.Column(db.Integer)
-    simulation_status = db.Column(db.Integer)
+    optimum_change_speed = db.Column(db.REAL)
+    simulation_status = db.Column(db.Text)
 
 #########
 # VIEWS #
@@ -44,7 +44,7 @@ def hello_world():
         parameters = {
                 "niche_size": int(request.form['niche_size']),
                 "number_of_traits": int(request.form['number_of_traits']),
-                "optimum_change_speed": int(request.form['optimum_change_speed'])
+                "optimum_change_speed": float(request.form['optimum_change_speed'])
                 }
         
         # create task entry
@@ -61,24 +61,43 @@ def hello_world():
             pickle.dump(parameters, handler, protocol = 2)
         
         
-        # parameters are copied to the server
-        scp_parameters = subprocess.Popen("scp " + parameters_filename + " transp@wloczykij:/home/transp/simulations/webservice", 
-            stdout=subprocess.PIPE, shell=True)
-        output, _ = scp_parameters.communicate()
-        
-        # program will wait run the simulations on the server
-        run_computation = subprocess.Popen(['./program.py', 
-            str(task.id)], stdout=subprocess.PIPE)
-        
-        #output, _ = p.communicate()
+        # Transfer parameters from the form to the server through the scp 
+        try:
+            scp_parameters = subprocess.Popen("scp " + parameters_filename + " transp@wloczykij:/home/transp/simulations/webservice", 
+                stdout = subprocess.PIPE, stderr = subprocess.PIPE, shell = True)
+            stdout, stderr = scp_parameters.communicate()
+        except Exception as e: 
+            msg ="""There was a problem during submittion of your task.
+                   This event was reported. 
+                   Please, try again in a few minutes or contact us."""
+            print(e)
+            return render_template("task_submitted.html", task = msg)
+
         task = Task.query.get(task.id)
-        task.result = "Pending"
+        task.simulation_status = "Pending"
         db.session.commit()
+        db.session.refresh(task)
+
+        # program will wait run the simulations on the server
+        try: 
+            run_computation = subprocess.Popen("./program.py " + str(task.id), stdout=subprocess.PIPE, shell=True)
+            out, err = run_computation.communicate()
+            print("program.py, out: " + str(out))
+            print("program.py, err: " + str(err))
+            print("program.py is running...(?)")
+        except Exception as e:
+            print(e)
+            return render_template("task_submitted.html", task = "program execution failed.")
+        #output, _ = p.communicate()
+        
+        #task = Task.query.get(task.id)
+        #task.simulation_status = "Pending"
+        #db.session.commit()
         return render_template("task_submitted.html", task = task)
         
     tasks = Task.query.all()
-    print(tasks)
-    return render_template("index.html", zmienna = tasks)
+    
+    return render_template("index.html", zmienna = tasks[(len(tasks)-5):])
 
 
 @app.route('/results/<ID>')

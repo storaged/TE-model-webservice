@@ -41,7 +41,7 @@ Optimum change speed: <input type="text" name="optimum_change_shift"
 </form>-->
 <ul>
 {% for el in zmienna %}
-<li>{{el.niche_size}}, {{el.number_of_traits}}, {{el.optimum_change_speed}}, <a href="results/{{el.id}}">See results</a></li>
+<li>{{el.niche_size}}, {{el.number_of_traits}}, {{el.optimum_change_speed}}, {{el.simulation_status}}, <a href="results/{{el.id}}">See results</a></li>
 {% endfor %}
 </ul>
 
