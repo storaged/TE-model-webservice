@@ -35,7 +35,7 @@ def main(myargs):
     con = sqlite3.connect(  'TEmodelDB.sqlite3',
                             detect_types=sqlite3.PARSE_DECLTYPES)
     cur = con.cursor()
-    cur.execute("UPDATE Task SET simulation_status = " + str("complete") + " WHERE id = " + ID + ";")
+    cur.execute("UPDATE Task SET simulation_status = '" + str("complete") + "' WHERE id = " + task_ID + ";")
     con.commit() 
 
 if __name__ == "__main__": 

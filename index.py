@@ -6,19 +6,24 @@ from flask_migrate import Migrate
 
 app = Flask(__name__)
 
-# CONFIGURATION
+#################
+# CONFIGURATION #
+#################
 app.config.update(
     SQLALCHEMY_DATABASE_URI = 'sqlite:///TEmodelDB.sqlite3'
     )
 
-# DATABASE INITIALIZATION
+###########################
+# DATABASE INITIALIZATION #
+###########################
 db = SQLAlchemy()
 db.init_app(app)
 
 migrate = Migrate(app, db)
 
-
-# MODELS
+##########
+# MODELS #
+##########
 class Task(db.Model):
 
     id = db.Column(db.Integer, primary_key = True)
@@ -27,18 +32,19 @@ class Task(db.Model):
     optimum_change_speed = db.Column(db.Integer)
     simulation_status = db.Column(db.Integer)
 
-# VIEWS
-
-
+#########
+# VIEWS #
+#########
 @app.route('/', methods = ['GET', 'POST'])
 def hello_world():
     if request.method == "POST":
         
+        for i in request.form.keys(): print(i)
         # dictionary of parameters submitted by user
         parameters = {
-                niche_size: int(request.form['niche_size']),
-                number_of_traits: int(request.form['number_of_traits']),
-                optimum_change_speed: int(request.form['optimum_change_speed'])
+                "niche_size": int(request.form['niche_size']),
+                "number_of_traits": int(request.form['number_of_traits']),
+                "optimum_change_speed": int(request.form['optimum_change_speed'])
                 }
         
         # create task entry
@@ -50,13 +56,14 @@ def hello_world():
         db.session.commit()
         db.session.refresh(task)
 
-        parameters_filename = "parameters_" + str(task.id) + ".dat", 
-        pickle.dump(parameters, open(parameters_filename, "w"))
+        parameters_filename = "parameters_" + str(task.id) + ".dat"
+        with open(parameters_filename, 'wb') as handler:
+            pickle.dump(parameters, handler, protocol = 2)
+        
         
         # parameters are copied to the server
-        scp_parameters = subprocess.Popen(["scp " + parameters_filename +
-            " transp@wloczykij:/home/transp/simulations/webservice"], 
-            stdout=subprocess.PIPE)
+        scp_parameters = subprocess.Popen("scp " + parameters_filename + " transp@wloczykij:/home/transp/simulations/webservice", 
+            stdout=subprocess.PIPE, shell=True)
         output, _ = scp_parameters.communicate()
         
         # program will wait run the simulations on the server
@@ -70,6 +77,7 @@ def hello_world():
         return render_template("task_submitted.html", task = task)
         
     tasks = Task.query.all()
+    print(tasks)
     return render_template("index.html", zmienna = tasks)
 
 

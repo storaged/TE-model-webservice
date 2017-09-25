@@ -24,7 +24,7 @@
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
-<form method="POST">
+<!--<form method="POST">
 PARAM1: <input type="text" name="param1"> <br>
 PARAM2: <input type="text" name="param2"> <br>
 Niche Size:  <input type="text" name="niche_size" value="1000"> <br>
@@ -38,10 +38,10 @@ Optimum change speed: <input type="text" name="optimum_change_shift"
                                          Generations per shift: <input type="text" name="generations_per_shift"> <br>
 
 <input type="submit">
-</form>
+</form>-->
 <ul>
 {% for el in zmienna %}
-<li>{{el.param1}}, {{el.param2}}, <a href="results/{{el.result}}">See results</a></li>
+<li>{{el.niche_size}}, {{el.number_of_traits}}, {{el.optimum_change_speed}}, <a href="results/{{el.id}}">See results</a></li>
 {% endfor %}
 </ul>
 
