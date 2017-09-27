@@ -1,0 +1,17 @@
+/*.inputs {
+  display: none;
+  background-color: #129232;
+}
+*/
+#test {
+  background-color: green;
+  color: #119988;
+}
+
+.inputs {
+  display: none;
+}
+
+#TEparams:checked ~ .inputs {
+  display: initial;
+}

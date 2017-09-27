@@ -32,6 +32,21 @@ class Task(db.Model):
     optimum_change_speed = db.Column(db.REAL)
     simulation_status = db.Column(db.Text)
 
+def tasks_to_list(tasks):
+    mylist = []
+    names = []
+    first = True
+    for task in tasks:
+        mydir = {}
+        for attr in dir(task):
+            if not attr.startswith("_") and attr not in ["metadata", "query", "query_class"]:
+                if first:
+                    names.append(attr)
+                mydir[attr] = getattr(task, attr)
+        first = False
+        mylist.append(mydir)
+    return mylist, names
+
 #########
 # VIEWS #
 #########
@@ -90,18 +105,23 @@ def hello_world():
             return render_template("task_submitted.html", task = "program execution failed.")
         #output, _ = p.communicate()
         
-        #task = Task.query.get(task.id)
-        #task.simulation_status = "Pending"
-        #db.session.commit()
         return render_template("task_submitted.html", task = task)
         
+    ## Prepare some variables for the template 
     tasks = Task.query.all()
-    
-    return render_template("index.html", zmienna = tasks[(len(tasks)-5):])
+    tasks_list, names = tasks_to_list(tasks)    
+    tmp = list(filter(lambda x: x not in ['id', 'simulation_status'], names))
+    cols_num = 3 #math.floor(math.sqrt(len(tmp))) + 1
+    params_general = [tmp[i:i+cols_num] for i in range(0, len(tmp), 3)]
+    params_TE = []
+
+    return render_template("index.html", zmienna = tasks[(len(tasks)-5):], tasks_list = tasks_list, names = names, params_general = params_general, params_TE = params_TE)
 
 
 @app.route('/results/<ID>')
 def results(ID):
     results = Task.query.get(ID)
     return render_template("results.html", results = results, ID = ID)
-    
+   
+if __name__ == "__main__":
+    app.run()

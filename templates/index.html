@@ -1,49 +1,78 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
-
-<form method="POST">
-  <div class="form-group">
-    <label>Niche size</label>
-    <input type="text" class="form-control" id="niche_size" name="niche_size"
-    aria-describedby="emailHelp" placeholder="e.g. 1000">
+<div id="test">test</div>
+<form action="foo">
+  <input type="checkbox" class="foo">
+  <div class="inputs">
+    bla blah inputs
+    <input type="text">
+    <textarea name="" id="" cols="30" rows="10"></textarea>
   </div>
-  <div class="form-group">
-    <label>Number of traits</label>
-    <input type="text" class="form-control" id="number_of_traits"
-                                            name="number_of_traits"
-    placeholder="e.g. 2">
-  </div>
-  <div class="form-group">
-    <label>Optimum change speed</label>
-    <input type="text" class="form-control" id="optimum_change_speed"
-                                            name="optimum_change_speed"
-    placeholder="e.g. 0.001">
-  </div>
-
-  <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+<form method="POST">
+    {% for params_row in params_general %}
+    <div class="row">
+        {% for param in params_row %}
+        <div class="col-sm-4">
+            <div class="form-group">
+            <label>{{param.replace('_',' ').capitalize()}}</label>
+            <input type="text" class="form-control" id="{{param}}" name="{{param}}" placeholder="e.g. 1000">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    {% if not params_TE %}
+    <div class="row">
+        <div class="col-sm-4">
+                <input type="checkbox" class="foo form-check-input" id="TEparams">
+        </div>
+        <div class="inputs" id="TEparamsset">
+                bla blah inputs
+                <div class="form-group">
+                <label>Label</label>
+                <input type="text" class="form-control" id="{{param}}" name="{{param}}" placeholder="e.g. 1000">
+                </div>
+            
+        </div>
+    </div>
+    {% for params_row in params_TE %}
+    <div class="row">
+        {% for param in params_row %}
+        <div class="col-sm-4">
+            <div class="form-group">
+            <label>{{param.replace('_',' ').capitalize()}}</label>
+            <input type="text" class="form-control" id="{{param}}" name="{{param}}" placeholder="e.g. 1000">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    {% endif %}
+<button type="submit" class="btn btn-primary">Submit</button>
+</form> 
 
-<!--<form method="POST">
-PARAM1: <input type="text" name="param1"> <br>
-PARAM2: <input type="text" name="param2"> <br>
-Niche Size:  <input type="text" name="niche_size" value="1000"> <br>
-Number of traits:<input type="text" name="number_of_traits" value="2"> <br>
-Active optimum change: <input type="checkbox"
-onchange="document.getElementById('optimum_speed').disabled =
-                              !this.checked;"name='active_optimum_speed'
-                              id='active_optimum_speed'/> <br>
-Optimum change speed: <input type="text" name="optimum_change_shift"
-                                         id="optimum_speed"> <br>
-                                         Generations per shift: <input type="text" name="generations_per_shift"> <br>
-
-<input type="submit">
-</form>-->
-<ul>
-{% for el in zmienna %}
-<li>{{el.niche_size}}, {{el.number_of_traits}}, {{el.optimum_change_speed}}, {{el.simulation_status}}, <a href="results/{{el.id}}">See results</a></li>
-{% endfor %}
-</ul>
+<h2> Latest tasks </h2>
+<table class = "table table-hover">
+  <thead>
+    <tr>
+    {% for name in names %} 
+      <th> {{name.replace('_',' ').capitalize()}} </th>
+    {% endfor %}    
+    </tr>
+  </thead>
+  {% for task in tasks_list %}
+  <tbody>
+    <tr> 
+    {% for val in task.values() %}
+      <td> {{val}} </td>
+    {% endfor %}
+      <td> <a href="results/{{task.id}}">See results</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
 
 </div>
 {% endblock %}

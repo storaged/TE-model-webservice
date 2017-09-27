@@ -2,11 +2,11 @@
 <head>
   <title>TE-model simulations results</title>
 
-    <link rel="stylesheet" type="text/css" href="resources/style.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='resources/style.css') }}" />
     <!--<link rel="stylesheet" href="css/lightbox.css">-->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="resources/favicon.ico" />
+    <link rel="shortcut icon" href="/resources/favicon.ico" />
 
     <link rel="stylesheet"
         href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
@@ -24,7 +24,7 @@
 
     <!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     -->
-    <script src="js-scripts/my_functions.js"></script> -->
+    <script src="{{ url_for('static', filename='js-scripts/my_functions.js') }}"></script> 
 	<!--<script src="js-scripts/batches_comparison.js"></script>
 	<script src="js/jquery-1.11.0.min.js"></script>
     <script src="js/lightbox.js"></script> -->
