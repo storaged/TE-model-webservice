@@ -104,17 +104,23 @@ def tasks_to_list(tasks):
                 mydir[attr] = getattr(task, attr)
         first = False
         mylist.append(mydir)
-    return mylist
+    return mylist, names
 
-def get_Task_parameters():
+def get_Task_parameters(ncols):
     te_params = []
     general_params = []
     for attr in dir(Task):
-        if not attr.startswith("_") and attr not in ["metadata", "query", "query_class"]:
+        if not attr.startswith("_") and attr not in ["metadata", "query",
+                "query_class", "id", "simulation_status"]:
             if attr.startswith("TE_"):
                 te_params.append(attr.replace("TE_", ""))
             else:
                 general_params.append(attr)
+    general_params = [general_params[i:i+ncols] for i in range(0,
+        len(general_params), ncols)]
+    general_params = [general_params[i:i+ncols] for i in range(0,
+        len(general_params), ncols)]
+
     return general_params, te_params
 
 
@@ -180,14 +186,18 @@ def hello_world():
         
     ## Prepare some variables for the template 
     tasks = Task.query.all()
-    tasks_list = tasks_to_list(tasks)    
-    general_params, te_params = get_Task_parameters()
-    tmp = list(filter(lambda x: x not in ['id', 'simulation_status'], names))
+    tasks_list, names = tasks_to_list(tasks)    
+    
     cols_num = 3 #math.floor(math.sqrt(len(tmp))) + 1
-    params_general = [tmp[i:i+cols_num] for i in range(0, len(tmp), 3)]
-    params_TE = []
+    general_params, te_params = get_Task_parameters(cols_num)
 
-    return render_template("index.html", zmienna = tasks[(len(tasks)-5):], tasks_list = tasks_list, names = names, params_general = params_general, params_TE = params_TE)
+
+    # tmp = list(filter(lambda x: x not in ['id', 'simulation_status'], names))
+    # general_params = [general_params[i:i+cols_num] for i in range(0,
+    #    len(general_params), 3)]
+
+    return render_template("index.html", zmienna = tasks[(len(tasks)-5):],
+            tasks_list = tasks_list, names = names, params_general = general_params, params_TE = te_params)
 
 
 @app.route('/results/<ID>')
