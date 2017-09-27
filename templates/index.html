@@ -26,9 +26,10 @@
     {% if not params_TE %}
     <div class="row">
         <div class="col-sm-4">
-                <input type="checkbox" class="foo form-check-input" id="TEparams">
+                <input type="checkbox" class="foo form-check-input"
+                id="TEparams" onchange="showDIV('TE-params-set')" >
         </div>
-        <div class="inputs" id="TEparamsset">
+        <div id="TE-params-set">
                 bla blah inputs
                 <div class="form-group">
                 <label>Label</label>

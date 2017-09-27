@@ -1,5 +1,11 @@
-$(document).ready(function () {
-    $('#TEparams').change(function () {
-      $('#TEparamsset').fadeToggle();
-    });
-});
+function showDIV(actiondiv) {
+   var foo = document.getElementById(actiondiv);
+
+   if(foo.style.display == '' || foo.style.display == 'none'){
+        foo.style.display = 'block';
+   }
+   else {
+        foo.style.display = 'none';
+   }
+   alert(actiondiv)
+};

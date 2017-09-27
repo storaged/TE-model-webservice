@@ -27,10 +27,69 @@ migrate = Migrate(app, db)
 class Task(db.Model):
 
     id = db.Column(db.Integer, primary_key = True)
-    niche_size = db.Column(db.Integer)
-    number_of_traits = db.Column(db.Integer)
-    optimum_change_speed = db.Column(db.REAL)
     simulation_status = db.Column(db.Text)
+
+    ############################
+    # environmental parameters #
+    ############################
+    niche_size              = db.Column(db.Integer)
+    optimum_change_speed    = db.Column(db.REAL)
+    selection_radius        = db.Column(db.REAL)    # default: 20.0
+    number_of_generations   = db.Column(db.Integer)
+
+    # expected_horiz_transfers      = 0.0 | CONST
+    # random_pressure               = 0.0 | CONST
+    # min_survival_fitness          = 0.0 | CONST
+    # stability_period              = 0   | CONST
+
+    #########################
+    # individual parameters #
+    #########################
+    number_of_traits        = db.Column(db.Integer) # no_phenotype_properties
+    random_mutation_rate    = db.Column(db.REAL)    # default: 0.003
+    
+    # non_transposition_mutation_stdev    = 1.0 | CONST
+    # genome_size               = 1     | CONST
+    # tree_mode                 = True  | CONST
+    # initial_phenotype_stdev   = 0.01  | CONST
+    # sexual_mode               = True  | CONST
+   
+    #########################
+    # TE related parameters #
+    #########################
+    TE_starting_te_no           = db.Column(db.Integer)
+    TE_deauton_probability      = db.Column(db.REAL) # default: 0.0
+    TE_inactivation_probability = db.Column(db.REAL) # default: 0.003
+    TE_transposition_rate       = db.Column(db.REAL) # default: 0.003
+    TE_deletion_probability     = db.Column(db.REAL) # default: 0.003
+    
+    # transposition_mutation_stdev          = 1.0   | CONST 'YARD STICK'
+    # transposition_dynamics                = arnaud| CONST
+    # transposon_creation_rate              = 0.0   | CONST
+    # nonlethal_transposition_likelihood    = 1.0   | CONST
+    # duplicative_transposition_probability = 1.0   | CONST
+    # te_mutation_change_binding            = True  | CONST
+    # autonomous_transp_dynamics            = arnaud| CONST
+    
+    #number_of_mutations   = 0
+    #expected_mutation_shift   = 0.0
+    #is_drift_directed   = True
+    #fluctuations_magnitude   = 0.0
+
+    # reproducer   = location_mode_off
+    # killer   = null
+    # pint   = 3
+    # run_no   = 0
+    # big_data_collection_every   = 500
+    # plots_enabled   = True
+    # tmpdir   = /home/transp/tmp
+    # location_mode   = False
+    # self_breeding   = False
+    # offspring_size   = 5
+    # multidim_changes   = True
+    # uniform_offspring   = False
+    
+    
 
 def tasks_to_list(tasks):
     mylist = []
@@ -45,7 +104,19 @@ def tasks_to_list(tasks):
                 mydir[attr] = getattr(task, attr)
         first = False
         mylist.append(mydir)
-    return mylist, names
+    return mylist
+
+def get_Task_parameters():
+    te_params = []
+    general_params = []
+    for attr in dir(Task):
+        if not attr.startswith("_") and attr not in ["metadata", "query", "query_class"]:
+            if attr.startswith("TE_"):
+                te_params.append(attr.replace("TE_", ""))
+            else:
+                general_params.append(attr)
+    return general_params, te_params
+
 
 #########
 # VIEWS #
@@ -109,7 +180,8 @@ def hello_world():
         
     ## Prepare some variables for the template 
     tasks = Task.query.all()
-    tasks_list, names = tasks_to_list(tasks)    
+    tasks_list = tasks_to_list(tasks)    
+    general_params, te_params = get_Task_parameters()
     tmp = list(filter(lambda x: x not in ['id', 'simulation_status'], names))
     cols_num = 3 #math.floor(math.sqrt(len(tmp))) + 1
     params_general = [tmp[i:i+cols_num] for i in range(0, len(tmp), 3)]
