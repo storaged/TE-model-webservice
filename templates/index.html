@@ -1,15 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
-<div id="test">test</div>
-<form action="foo">
-  <input type="checkbox" class="foo">
-  <div class="inputs">
-    bla blah inputs
-    <input type="text">
-    <textarea name="" id="" cols="30" rows="10"></textarea>
-  </div>
-</form>
 <form method="POST">
     {% for params_row in params_general %}
     <div class="row">
@@ -17,39 +8,39 @@
         <div class="col-sm-4">
             <div class="form-group">
             <label>{{param.replace('_',' ').capitalize()}}</label>
-            <input type="text" class="form-control" id="{{param}}" name="{{param}}" placeholder="e.g. 1000">
+            <input type="text" class="form-control" id="{{param}}" 
+            name="{{param}}" placeholder="e.g. 1000">
             </div>
         </div>
         {% endfor %}
     </div>
     {% endfor %}
-    {% if not params_TE %}
+    {% if params_TE %}
     <div class="row">
         <div class="col-sm-4">
+            <div class="form-check">
+                <label class="form-check-label">
                 <input type="checkbox" class="foo form-check-input"
                 id="TEparams" onchange="showDIV('TE-params-set')" >
-        </div>
-        <div id="TE-params-set">
-                bla blah inputs
-                <div class="form-group">
-                <label>Label</label>
-                <input type="text" class="form-control" id="{{param}}" name="{{param}}" placeholder="e.g. 1000">
-                </div>
-            
+                Enable transposable elements dynamics
+                </label>
+            </div>
         </div>
     </div>
+    <div id="TE-params-set" style="display: none">
     {% for params_row in params_TE %}
     <div class="row">
         {% for param in params_row %}
         <div class="col-sm-4">
             <div class="form-group">
-            <label>{{param.replace('_',' ').capitalize()}}</label>
-            <input type="text" class="form-control" id="{{param}}" name="{{param}}" placeholder="e.g. 1000">
+            <label>{{param.replace('TE_','').replace('_',' ').capitalize()}}</label>
+            <input type="text" class="form-control" id="{{param}}" name="{{param}}" value="0" placeholder="e.g. 1000">
             </div>
         </div>
         {% endfor %}
     </div>
     {% endfor %}
+    </div>
     {% endif %}
 <button type="submit" class="btn btn-primary">Submit</button>
 </form> 

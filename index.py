@@ -1,6 +1,7 @@
 import subprocess
 import pickle
-from flask import Flask, render_template, request
+import pysftp
+from flask import Flask, render_template, request, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
@@ -32,10 +33,10 @@ class Task(db.Model):
     ############################
     # environmental parameters #
     ############################
-    niche_size              = db.Column(db.Integer)
-    optimum_change_speed    = db.Column(db.REAL)
-    selection_radius        = db.Column(db.REAL)    # default: 20.0
-    number_of_generations   = db.Column(db.Integer)
+    niche_size              = db.Column(db.Integer, default = 5000)
+    optimum_change_speed    = db.Column(db.REAL, default = 0.01)
+    selection_radius        = db.Column(db.REAL, default = 20.0)    # default: 20.0
+    number_of_generations   = db.Column(db.Integer, default = 2000)
 
     # expected_horiz_transfers      = 0.0 | CONST
     # random_pressure               = 0.0 | CONST
@@ -113,16 +114,20 @@ def get_Task_parameters(ncols):
         if not attr.startswith("_") and attr not in ["metadata", "query",
                 "query_class", "id", "simulation_status"]:
             if attr.startswith("TE_"):
-                te_params.append(attr.replace("TE_", ""))
+                te_params.append(attr)
             else:
                 general_params.append(attr)
     general_params = [general_params[i:i+ncols] for i in range(0,
         len(general_params), ncols)]
-    general_params = [general_params[i:i+ncols] for i in range(0,
-        len(general_params), ncols)]
+    te_params = [te_params[i:i+ncols] for i in range(0,
+        len(te_params), ncols)]
 
     return general_params, te_params
 
+def get_parameters_dict(my_form):
+    params = {}
+    print(str(my_form))
+    return {}
 
 #########
 # VIEWS #
@@ -131,19 +136,9 @@ def get_Task_parameters(ncols):
 def hello_world():
     if request.method == "POST":
         
-        for i in request.form.keys(): print(i)
-        # dictionary of parameters submitted by user
-        parameters = {
-                "niche_size": int(request.form['niche_size']),
-                "number_of_traits": int(request.form['number_of_traits']),
-                "optimum_change_speed": float(request.form['optimum_change_speed'])
-                }
+        parameters = request.form.to_dict()
         
-        # create task entry
-        task = Task(niche_size = parameters['niche_size'],
-                    number_of_traits = parameters['number_of_traits'],
-                    optimum_change_speed = parameters['optimum_change_speed'])
-
+        task = Task(**parameters)
         db.session.add(task)
         db.session.commit()
         db.session.refresh(task)
@@ -173,10 +168,10 @@ def hello_world():
         # program will wait run the simulations on the server
         try: 
             run_computation = subprocess.Popen("./program.py " + str(task.id), stdout=subprocess.PIPE, shell=True)
-            out, err = run_computation.communicate()
-            print("program.py, out: " + str(out))
-            print("program.py, err: " + str(err))
-            print("program.py is running...(?)")
+            #out, err = run_computation.communicate()
+            #print("program.py, out: " + str(out))
+            #print("program.py, err: " + str(err))
+            #print("program.py is running...(?)")
         except Exception as e:
             print(e)
             return render_template("task_submitted.html", task = "program execution failed.")
@@ -184,26 +179,51 @@ def hello_world():
         
         return render_template("task_submitted.html", task = task)
         
-    ## Prepare some variables for the template 
+    ## NON-POST ACITON
+    ## Prepare some variables for the template
+    ## Create a list of existing tasks
     tasks = Task.query.all()
-    tasks_list, names = tasks_to_list(tasks)    
+    tasks_list, names = tasks_to_list(tasks[(len(tasks) - 5):len(tasks)])    
     
+    ## Get all parameters for the task form
     cols_num = 3 #math.floor(math.sqrt(len(tmp))) + 1
     general_params, te_params = get_Task_parameters(cols_num)
 
-
-    # tmp = list(filter(lambda x: x not in ['id', 'simulation_status'], names))
-    # general_params = [general_params[i:i+cols_num] for i in range(0,
-    #    len(general_params), 3)]
-
     return render_template("index.html", zmienna = tasks[(len(tasks)-5):],
-            tasks_list = tasks_list, names = names, params_general = general_params, params_TE = te_params)
+            tasks_list = tasks_list, names = names, 
+            params_general = general_params, params_TE = te_params)
 
 
 @app.route('/results/<ID>')
 def results(ID):
     results = Task.query.get(ID)
+
     return render_template("results.html", results = results, ID = ID)
    
+@app.route('/results/images/<ID>/<BATCH>')
+def getImage(ID, BATCH):
+    import requests
+    import sys
+    import pycurl 
+    import io 
+    
+    HOST        = 'wloczykij'
+    USER        = 'sftp://transp'
+    WEBSERV_DIR = '/home/transp/simulations/webservice/'
+    PATH_TO_KEY = '/home/krzysiek/.ssh/id_rsa'
+    
+    IMG_NAME    = "plot-3.png"
+     
+    url   = USER + "@" + HOST + ":" + WEBSERV_DIR + 'model-transposons-' + ID + "/batch-run-" + BATCH + "/" + IMG_NAME
+    
+    print(url)
+
+    c = pycurl.Curl()
+    c.setopt(c.URL, url)
+    my_bytes = c.perform()
+    return send_file(io.BytesIO(my_bytes),
+                     attachment_filename=IMG_NAME,
+                     mimetype='image/jpg')
+
 if __name__ == "__main__":
     app.run()

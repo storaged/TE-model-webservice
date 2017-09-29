@@ -7,5 +7,4 @@ function showDIV(actiondiv) {
    else {
         foo.style.display = 'none';
    }
-   alert(actiondiv)
 };

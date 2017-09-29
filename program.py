@@ -20,7 +20,6 @@ def set_simulation_status(status, task_ID):
    
 
 def main(myargs):
-    print(myargs)
     time.sleep(1)
     task_ID = myargs[0]
         
@@ -44,12 +43,31 @@ def main(myargs):
         with open("program.log", "w+") as f:
             f.write(result)
             f.write(errs)
+    
     except Exception as e:
         set_simulation_status("Error", task_ID)
         print(e)
     
+    COMMAND = "'/home/transp/simulations/webservice/run_simulations.py " + task_ID + "'"
 
+    try: 
+        ssh = subprocess.Popen("ssh -f transp@wloczykij " + COMMAND,
+                       shell = True)
+                       #stdout = subprocess.PIPE,
+                       #stderr = subprocess.PIPE)
+        # result, errs = ssh.communicate()
+        # print("From program.py out: " + result)
+        # print("From program.py err: " + errs)
+      
+        with open("program.log", "w+") as f:
+            f.write(result)
+            f.write(errs)
     
+    except Exception as e:
+        set_simulation_status("Error", task_ID)
+        print(e)
+    
+        
     # run simulation 
     # result = sum(map(int, myargs[1:])) 
 
