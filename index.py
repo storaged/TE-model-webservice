@@ -1,6 +1,6 @@
 import subprocess
 import pickle
-import pysftp
+import additional_info as info
 from flask import Flask, render_template, request, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -92,31 +92,35 @@ class Task(db.Model):
     
     
 
-def tasks_to_list(tasks):
+def tasks_to_list(tasks, ordering):
     mylist = []
     names = []
     first = True
     for task in tasks:
-        mydir = {}
-        for attr in dir(task):
-            if not attr.startswith("_") and attr not in ["metadata", "query", "query_class"]:
-                if first:
-                    names.append(attr)
-                mydir[attr] = getattr(task, attr)
+        values = []
+        task_dir = dir(task)
+        for param in ordering:
+            if param in task_dir:
+                if first: names.append(param)
+                values.append(getattr(task, param))
         first = False
-        mylist.append(mydir)
+        mylist.append(values)
     return mylist, names
 
-def get_Task_parameters(ncols):
+def get_Task_parameters(ncols, parameters_desc, defaults):
     te_params = []
     general_params = []
     for attr in dir(Task):
         if not attr.startswith("_") and attr not in ["metadata", "query",
                 "query_class", "id", "simulation_status"]:
             if attr.startswith("TE_"):
-                te_params.append(attr)
+                param = info.Parameter(attr, attr, parameters_desc[attr],
+                        defaults[attr])
+                te_params.append(param)
             else:
-                general_params.append(attr)
+                param = info.Parameter(attr, attr, parameters_desc[attr],
+                        defaults[attr])
+                general_params.append(param)
     general_params = [general_params[i:i+ncols] for i in range(0,
         len(general_params), ncols)]
     te_params = [te_params[i:i+ncols] for i in range(0,
@@ -183,11 +187,13 @@ def hello_world():
     ## Prepare some variables for the template
     ## Create a list of existing tasks
     tasks = Task.query.all()
-    tasks_list, names = tasks_to_list(tasks[(len(tasks) - 5):len(tasks)])    
+    tasks_list, names = tasks_to_list(tasks[(len(tasks) - 5):len(tasks)],
+            info.get_parameters_order())    
     
     ## Get all parameters for the task form
     cols_num = 3 #math.floor(math.sqrt(len(tmp))) + 1
-    general_params, te_params = get_Task_parameters(cols_num)
+    general_params, te_params = get_Task_parameters(cols_num,
+            info.get_parameters_description(), info.get_parameters_defaults())
 
     return render_template("index.html", zmienna = tasks[(len(tasks)-5):],
             tasks_list = tasks_list, names = names, 
@@ -202,11 +208,10 @@ def results(ID):
    
 @app.route('/results/images/<ID>/<BATCH>')
 def getImage(ID, BATCH):
-    import requests
     import sys
     import pycurl 
     import io 
-    
+
     HOST        = 'wloczykij'
     USER        = 'sftp://transp'
     WEBSERV_DIR = '/home/transp/simulations/webservice/'
@@ -218,12 +223,22 @@ def getImage(ID, BATCH):
     
     print(url)
 
+    storage = io.StringIO()
+
     c = pycurl.Curl()
-    c.setopt(c.URL, url)
-    my_bytes = c.perform()
-    return send_file(io.BytesIO(my_bytes),
+    #c.setopt(c.URL, url)
+    #c.setopt(c.WRITEFUNCTION, storage.write)
+    #c.perform()
+    #storage.seek(0)
+
+    #response = io.BytesIO(storage.getValue())
+
+    #storage.close()
+
+    #c.close()
+    return send_file(storage,
                      attachment_filename=IMG_NAME,
-                     mimetype='image/jpg')
+                     mimetype='image/png')
 
 if __name__ == "__main__":
     app.run()

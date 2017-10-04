@@ -1,15 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container">
+</div> 
+<div class="container">
 <form method="POST">
     {% for params_row in params_general %}
     <div class="row">
         {% for param in params_row %}
         <div class="col-sm-4">
             <div class="form-group">
-            <label>{{param.replace('_',' ').capitalize()}}</label>
-            <input type="text" class="form-control" id="{{param}}" 
-            name="{{param}}" placeholder="e.g. 1000">
+                <label data-toggle="tooltip" title="{{param.desc}}">
+                    {{param.name.replace('_',' ').capitalize()}} <b> ? </b> </label>
+                <input  type="text" class="form-control" 
+                        id="{{param.name}}" name="{{param.name}}"
+                        placeholder="e.g. {{param.default}}">
             </div>
         </div>
         {% endfor %}
@@ -31,10 +35,12 @@
     {% for params_row in params_TE %}
     <div class="row">
         {% for param in params_row %}
-        <div class="col-sm-4">
+         <div class="col-sm-4">
             <div class="form-group">
-            <label>{{param.replace('TE_','').replace('_',' ').capitalize()}}</label>
-            <input type="text" class="form-control" id="{{param}}" name="{{param}}" value="0" placeholder="e.g. 1000">
+                <label data-toggle="tooltip" title="{{param.desc}}">
+                    {{param.name.replace('_',' ').capitalize()}} <span class="glyphicon glyphicon-exclamation-sign"></span> </label>
+                <input type="text" class="form-control" id="{{param.name}}" 
+                    name="{{param.name}}"  placeholder="e.g.{{param.default}}">
             </div>
         </div>
         {% endfor %}
@@ -44,9 +50,10 @@
     {% endif %}
 <button type="submit" class="btn btn-primary">Submit</button>
 </form> 
+</div>
 
 <h2> Latest tasks </h2>
-<table class = "table table-hover">
+<table class = "table table-hover table-condensed">
   <thead>
     <tr>
     {% for name in names %} 
@@ -57,14 +64,13 @@
   {% for task in tasks_list %}
   <tbody>
     <tr> 
-    {% for val in task.values() %}
+    {% for val in task %}
       <td> {{val}} </td>
     {% endfor %}
-      <td> <a href="results/{{task.id}}">See results</a></td>
+    <td> <a href="results/{{task[0]}}">See results</a></td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
 
-</div>
 {% endblock %}

@@ -8,3 +8,7 @@ function showDIV(actiondiv) {
         foo.style.display = 'none';
    }
 };
+
+$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+});
