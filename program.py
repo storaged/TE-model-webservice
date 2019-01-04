@@ -76,7 +76,7 @@ def main(myargs):
     # remove simulations folder
 
     # update database entry
-    set_simulation_status("Complete", task_ID)
+    # set_simulation_status("Complete", task_ID)
     
     
 

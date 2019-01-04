@@ -11,9 +11,16 @@
             <div class="form-group">
                 <label data-toggle="tooltip" title="{{param.desc}}">
                     {{param.name.replace('_',' ').capitalize()}} <b> ? </b> </label>
+                {% if param.name in errors %}
+                <div class="alert alert-danger alert-dismissable fade in">
+                    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                    <strong>Error!</strong> {{ errors[param.name] }}
+                </div>
+                {% endif %}
                 <input  type="text" class="form-control" 
                         id="{{param.name}}" name="{{param.name}}"
-                        placeholder="e.g. {{param.default}}">
+                        placeholder="e.g. {{param.default}}"
+                        value="{{param.default}}">
             </div>
         </div>
         {% endfor %}
@@ -38,9 +45,11 @@
          <div class="col-sm-4">
             <div class="form-group">
                 <label data-toggle="tooltip" title="{{param.desc}}">
-                    {{param.name.replace('_',' ').capitalize()}} <span class="glyphicon glyphicon-exclamation-sign"></span> </label>
+                    {{param.name.replace('_',' ').capitalize()}} <span
+                        class="glyphicon glyphicon-question-sign"></span> </label>
                 <input type="text" class="form-control" id="{{param.name}}" 
-                    name="{{param.name}}"  placeholder="e.g.{{param.default}}">
+                    name="{{param.name}}"  placeholder="e.g. {{param.default}}"
+                                           value= "{{param.default}}">
             </div>
         </div>
         {% endfor %}
@@ -67,7 +76,7 @@
     {% for val in task %}
       <td> {{val}} </td>
     {% endfor %}
-    <td> <a href="results/{{task[0]}}">See results</a></td>
+    <td> <a href="results/{{task[1]}}/{{task[2]}}">See results</a></td>
     </tr>
   {% endfor %}
   </tbody>
